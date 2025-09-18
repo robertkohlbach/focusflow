@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from './components/Header';
 import EisenhowerMatrix from './components/EisenhowerMatrix';
@@ -8,7 +7,7 @@ import { View } from './types';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>(View.Matrix);
-  const { tasks, addTask, deleteTask, moveTask } = useTasks();
+  const { tasks, addTask, deleteTask, moveTask, weeklyPlan, moveWeeklyTask, updateTaskContent, improveTaskContent } = useTasks();
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans">
@@ -20,9 +19,19 @@ const App: React.FC = () => {
             addTask={addTask}
             deleteTask={deleteTask}
             moveTask={moveTask}
+            weeklyPlan={weeklyPlan}
+            updateTaskContent={updateTaskContent}
+            improveTaskContent={improveTaskContent}
           />
         ) : (
-          <WeeklyView tasks={tasks} deleteTask={deleteTask} moveTask={moveTask} />
+          <WeeklyView
+            tasks={[...tasks.do, ...tasks.schedule]}
+            weeklyPlan={weeklyPlan}
+            deleteTask={deleteTask}
+            moveTask={moveWeeklyTask}
+            updateTaskContent={updateTaskContent}
+            improveTaskContent={improveTaskContent}
+          />
         )}
       </main>
       <footer className="text-center p-4 text-xs text-slate-500 dark:text-slate-400">

@@ -9,6 +9,7 @@ export enum QuadrantID {
 export interface Task {
   id: string;
   content: string;
+  quadrant: QuadrantID;
 }
 
 export type Tasks = {
@@ -19,3 +20,12 @@ export enum View {
   Matrix = 'matrix',
   Weekly = 'weekly',
 }
+
+// New types for Weekly View
+export type DayID = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+export const ALL_DAYS: DayID[] = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+export type WeeklyPlanColumnID = DayID | 'backlog';
+
+export type WeeklyPlan = {
+  [key in WeeklyPlanColumnID]: string[]; // Store only task IDs
+};

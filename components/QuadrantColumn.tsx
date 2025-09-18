@@ -1,45 +1,62 @@
-
 import React from 'react';
-import { QuadrantID, Task } from '../types';
+import { Task, WeeklyPlan, ALL_DAYS, DayID } from '../types';
 import TaskCard from './TaskCard';
 
-interface QuadrantColumnProps {
-  quadrantId: QuadrantID;
+interface TaskColumnProps {
+  id: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   tasks: Task[];
-  deleteTask: (taskId: string, quadrant: QuadrantID) => void;
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, quadrantId: QuadrantID) => void;
+  deleteTask: (taskId: string) => void;
+  updateTaskContent: (taskId: string, newContent: string) => void;
+  improveTaskContent: (content: string) => Promise<string>;
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, columnId: string) => void;
   onDragEnd: () => void;
-  onDrop: (e: React.DragEvent<HTMLDivElement>, quadrantId: QuadrantID) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, columnId: string) => void;
   draggedItemId: string | null;
-  sourceQuadrantId: QuadrantID | null;
+  sourceColumnId: string | null;
   details: {
     textColor: string;
     borderColor: string;
     bgColor: string;
   };
+  weeklyPlan?: WeeklyPlan; // Optional weeklyPlan for showing day assignments
 }
 
-const QuadrantColumn: React.FC<QuadrantColumnProps> = ({
-  quadrantId,
+const TaskColumn: React.FC<TaskColumnProps> = ({
+  id,
   title,
   subtitle,
   tasks,
   deleteTask,
+  updateTaskContent,
+  improveTaskContent,
   onDragStart,
   onDragEnd,
   onDrop,
   draggedItemId,
-  sourceQuadrantId,
+  sourceColumnId,
   details,
+  weeklyPlan,
 }) => {
   const [isOver, setIsOver] = React.useState(false);
+
+  // Create a reverse map to find a task's assigned day
+  const taskDayMap = React.useMemo(() => {
+    if (!weeklyPlan) return new Map<string, DayID>();
+    const map = new Map<string, DayID>();
+    for (const day of ALL_DAYS) {
+      for (const taskId of weeklyPlan[day]) {
+        map.set(taskId, day);
+      }
+    }
+    return map;
+  }, [weeklyPlan]);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    if (draggedItemId && sourceQuadrantId) {
+    if (draggedItemId && sourceColumnId) {
       setIsOver(true);
     }
   };
@@ -50,7 +67,7 @@ const QuadrantColumn: React.FC<QuadrantColumnProps> = ({
   };
   
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-      onDrop(e, quadrantId);
+      onDrop(e, id);
       setIsOver(false);
   }
 
@@ -59,23 +76,26 @@ const QuadrantColumn: React.FC<QuadrantColumnProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`rounded-xl shadow-sm border ${details.borderColor} ${details.bgColor} p-4 transition-all duration-300 ${isOver ? 'bg-opacity-20 scale-[1.02] shadow-lg' : ''}`}
+      className={`rounded-xl shadow-sm border ${details.borderColor} ${details.bgColor} p-4 transition-all duration-300 flex flex-col ${isOver ? 'bg-opacity-20 scale-[1.02] shadow-lg' : ''}`}
     >
       <div className="mb-4">
         <h2 className={`text-lg font-bold ${details.textColor}`}>{title}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>
+        {subtitle && <p className="text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
       </div>
-      <div className="space-y-3 min-h-[150px]">
+      <div className="space-y-3 min-h-[150px] flex-grow">
         {tasks.length > 0 ? (
           tasks.map(task => (
             <TaskCard
               key={task.id}
               task={task}
-              quadrantId={quadrantId}
+              columnId={id}
               onDelete={deleteTask}
+              onUpdateContent={updateTaskContent}
+              improveTaskContent={improveTaskContent}
               onDragStart={onDragStart}
               onDragEnd={onDragEnd}
               isDragging={draggedItemId === task.id}
+              assignedDay={taskDayMap.get(task.id)}
             />
           ))
         ) : (
@@ -90,4 +110,4 @@ const QuadrantColumn: React.FC<QuadrantColumnProps> = ({
   );
 };
 
-export default QuadrantColumn;
+export default TaskColumn;

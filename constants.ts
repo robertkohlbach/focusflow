@@ -1,5 +1,5 @@
 
-import { QuadrantID } from './types';
+import { QuadrantID, DayID } from './types';
 
 interface QuadrantDetails {
   title: string;
@@ -44,3 +44,21 @@ export const QUADRANTS: Record<QuadrantID, QuadrantDetails> = {
     bgColor: 'bg-slate-500/5',
   },
 };
+
+// New constant for Weekly View
+// FIX: Export the DayDetails interface so it can be used in other files.
+export interface DayDetails {
+  id: DayID;
+  title: string;
+  abbreviation: string;
+}
+
+export const DAYS_OF_WEEK: DayDetails[] = [
+  { id: 'monday', title: 'Montag', abbreviation: 'Mo' },
+  { id: 'tuesday', title: 'Dienstag', abbreviation: 'Di' },
+  { id: 'wednesday', title: 'Mittwoch', abbreviation: 'Mi' },
+  { id: 'thursday', title: 'Donnerstag', abbreviation: 'Do' },
+  { id: 'friday', title: 'Freitag', abbreviation: 'Fr' },
+  { id: 'saturday', title: 'Samstag', abbreviation: 'Sa' },
+  { id: 'sunday', title: 'Sonntag', abbreviation: 'So' },
+];
